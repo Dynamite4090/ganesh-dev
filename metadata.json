@@ -1,0 +1,6 @@
+{
+  "name": "Ganesh Chavan Portfolio",
+  "description": "Professional Game Developer Portfolio for Ganesh Chavan, showcasing projects in Unreal Engine 5, Unity 6, and AR/VR gameplay programming.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

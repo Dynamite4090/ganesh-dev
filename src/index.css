@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-game-bg: #050811;
+  --color-game-surface: #0a0f1d;
+  --color-game-card: #0f172a;
+  --color-game-border: #1e293b;
+  --color-game-cyan: #00d4ff;
+  --color-game-orange: #ff6b35;
+  --color-game-gold: #f0c040;
+  --color-game-muted: #8899aa;
+  
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-head: "Rajdhani", sans-serif;
+  --font-mono: "Share Tech Mono", monospace;
+}
+
+/* Custom styles */
+@layer utilities {
+  .text-glow-cyan {
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+  }
+  .text-glow-orange {
+    text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+  }
+  .border-glow-cyan {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.15);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050811;
+}
+::-webkit-scrollbar-thumb {
+  background: #00d4ff;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #33ddff;
+}
+
+/* Scanline background overlay */
+.scanline-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 212, 255, 0.015) 2px,
+    rgba(0, 212, 255, 0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 50;
+}
+
