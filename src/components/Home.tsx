@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Gamepad, Brain, Smartphone, Award, ArrowRight, Activity, Calendar } from 'lucide-react';
+import { Gamepad, Brain, Smartphone, Award, ArrowRight, Activity, Calendar, FileText } from 'lucide-react';
 import { contactInfo } from '../data';
 
 interface HomeProps {
@@ -80,6 +80,14 @@ export default function Home({ onNavigate }: HomeProps) {
             >
               <span>Explore My Work</span>
               <ArrowRight size={16} />
+            </button>
+            <button
+              onClick={() => onNavigate('resume')}
+              className="flex items-center gap-2 bg-game-orange hover:bg-game-orange/80 text-black py-3 px-6 font-head font-bold text-sm tracking-wider uppercase rounded-lg cursor-pointer transition-all transform hover:-translate-y-0.5 shadow-[0_0_12px_rgba(255,107,53,0.3)] hover:shadow-[0_0_18px_rgba(255,107,53,0.5)]"
+              id="cta-resume-btn"
+            >
+              <FileText size={16} />
+              <span>View Resume</span>
             </button>
             <button
               onClick={() => onNavigate('contact')}

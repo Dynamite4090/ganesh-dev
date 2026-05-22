@@ -12,6 +12,7 @@ import Skills from './components/Skills';
 import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
+import ResumeViewer from './components/ResumeViewer';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('home');
@@ -35,6 +36,8 @@ export default function App() {
         return <Experience />;
       case 'contact':
         return <Contact />;
+      case 'resume':
+        return <ResumeViewer />;
       default:
         return <Home onNavigate={(tab) => setActiveTab(tab)} />;
     }
