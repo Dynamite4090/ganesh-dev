@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { jsPDF } from 'jspdf';
 import { 
   Printer, 
   Copy, 
@@ -103,6 +104,304 @@ Dr. Bapuji Salunke College, Miraj
 Secondary School Certificate (10th Grade) | 2020 Graduate
 Alphonsa School, Miraj`;
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    let y = 15; // Vertical cursor in mm
+    const margin = 15;
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const contentWidth = pageWidth - 2 * margin; // 180mm
+
+    const checkPageBreak = (neededHeight: number) => {
+      if (y + neededHeight > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    };
+
+    const drawRule = () => {
+      checkPageBreak(4);
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, margin + contentWidth, y);
+      y += 5;
+    };
+
+    const drawSectionHeader = (title: string) => {
+      checkPageBreak(12);
+      y += 2;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(17, 24, 39); // Very dark gray / charcoal
+      doc.text(title.toUpperCase(), margin, y);
+      y += 1.5;
+      
+      // Thin line directly under header
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.25);
+      doc.line(margin, y, margin + contentWidth, y);
+      y += 4;
+    };
+
+    const drawText = (
+      text: string, 
+      fontSize: number, 
+      fontStyle: 'normal' | 'bold' | 'oblique' | 'bolditalic' = 'normal', 
+      hexColor: string = '#1f2937', 
+      extraSpaceAfter: number = 3
+    ) => {
+      doc.setFont('helvetica', fontStyle);
+      doc.setFontSize(fontSize);
+      const r = parseInt(hexColor.slice(1, 3), 16);
+      const g = parseInt(hexColor.slice(3, 5), 16);
+      const b = parseInt(hexColor.slice(5, 7), 16);
+      doc.setTextColor(r, g, b);
+
+      const lines = doc.splitTextToSize(text, contentWidth);
+      const lineHeight = fontSize * 0.3528 * 1.35; // clean leading
+      const blockHeight = lines.length * lineHeight;
+
+      checkPageBreak(blockHeight + extraSpaceAfter);
+      
+      lines.forEach((line: string, idx: number) => {
+        doc.text(line, margin, y + (idx * lineHeight));
+      });
+      
+      y += blockHeight + extraSpaceAfter;
+    };
+
+    const drawBullet = (
+      bulletText: string,
+      fontSize: number = 9,
+      hexColor: string = '#1f2937',
+      extraSpaceAfter: number = 2
+    ) => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(fontSize);
+      const r = parseInt(hexColor.slice(1, 3), 16);
+      const g = parseInt(hexColor.slice(3, 5), 16);
+      const b = parseInt(hexColor.slice(5, 7), 16);
+      doc.setTextColor(r, g, b);
+
+      const bulletIndent = 5; 
+      const lineIndentWidth = contentWidth - bulletIndent;
+      const lines = doc.splitTextToSize(bulletText, lineIndentWidth);
+      const lineHeight = fontSize * 0.3528 * 1.35;
+      const blockHeight = lines.length * lineHeight;
+
+      checkPageBreak(blockHeight + extraSpaceAfter);
+
+      // Draw a solid vector square bullet (bullet styling)
+      doc.setFillColor(75, 85, 99); 
+      doc.rect(margin + 1.2, y - 2.2, 1.2, 1.2, 'F');
+      
+      lines.forEach((line: string, idx: number) => {
+        doc.text(line, margin + bulletIndent, y + (idx * lineHeight));
+      });
+
+      y += blockHeight + extraSpaceAfter;
+    };
+
+    const drawJobHeader = (role: string, company: string, dateRange: string) => {
+      checkPageBreak(12);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(17, 24, 39);
+      doc.text(role, margin, y);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(235, 94, 40); // Accent tone
+      const dateWidth = doc.getTextWidth(dateRange);
+      doc.text(dateRange, margin + contentWidth - dateWidth, y);
+      
+      y += 4;
+      
+      doc.setFont('helvetica', 'oblique');
+      doc.setFontSize(9);
+      doc.setTextColor(75, 85, 99);
+      doc.text(company, margin, y);
+      
+      y += 4;
+    };
+
+    const drawProjectHeader = (title: string, details: string, dateRange: string) => {
+      checkPageBreak(12);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(17, 24, 39);
+      doc.text(title, margin, y);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(107, 114, 128);
+      const dateWidth = doc.getTextWidth(dateRange);
+      doc.text(dateRange, margin + contentWidth - dateWidth, y);
+      
+      y += 4;
+      
+      doc.setFont('helvetica', 'oblique');
+      doc.setFontSize(8.5);
+      doc.setTextColor(14, 116, 144); // deep cyan
+      doc.text(details, margin, y);
+      
+      y += 4;
+    };
+
+    const drawGridRow = (col1: string, col2: string) => {
+      const col1Width = 35;
+      const col2Width = contentWidth - col1Width;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(17, 24, 39);
+      const col1Lines = doc.splitTextToSize(col1, col1Width);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(55, 65, 81);
+      const col2Lines = doc.splitTextToSize(col2, col2Width);
+      
+      const lineHeight = 9 * 0.3528 * 1.35;
+      const col1Height = col1Lines.length * lineHeight;
+      const col2Height = col2Lines.length * lineHeight;
+      const rowHeight = Math.max(col1Height, col2Height);
+      
+      checkPageBreak(rowHeight + 2.5);
+      
+      col1Lines.forEach((line: string, idx: number) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(17, 24, 39);
+        doc.text(line, margin, y + (idx * lineHeight));
+      });
+      
+      col2Lines.forEach((line: string, idx: number) => {
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(55, 65, 81);
+        doc.text(line, margin + col1Width, y + (idx * lineHeight));
+      });
+      
+      y += rowHeight + 2.5;
+    };
+
+    // Header Block
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(26);
+    doc.setTextColor(17, 24, 39); 
+    doc.text('GANESH CHAVAN', margin, y);
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(14, 165, 233); // cyan theme
+    doc.text('Game Developer  |  Unity & Unreal Engine  |  AR/VR', margin, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(75, 85, 99); 
+    const contactLine1 = `+91 9637183960     |     chavanganesh9405543605@gmail.com     |     Pune, India`;
+    doc.text(contactLine1, margin, y);
+    y += 4;
+    
+    const contactLine2 = `LinkedIn: ganesh-chavans (https://linkedin.com/in/ganesh-chavans)`;
+    doc.text(contactLine2, margin, y);
+    y += 5;
+
+    drawRule();
+
+    // Summary Section
+    drawSectionHeader('PROFESSIONAL SUMMARY');
+    const summaryText = "Final-year BCA (Game Development) student at Ajeenkya DY Patil University, Pune, maintaining a CGPA of 8.68 with zero backlogs. Proficient in Unity and Unreal Engine 5, with hands-on experience in gameplay programming, enemy AI systems, AR/VR development, and 3D environment design. Completed a 3-month industry internship as a Game Programmer at Mudgal Overseas. Delivered two full-scale academic game projects — a 3D racing title (Unity) and a first-person survival shooter (UE5/C++) — each with full documentation and university evaluation.";
+    drawText(summaryText, 9, 'normal', '#374151', 4);
+
+    // Skills Section
+    drawSectionHeader('TECHNICAL SKILLS');
+    drawGridRow('Game Engines', 'Unity (2D/3D, AR Foundation, Unity 6), Unreal Engine 5 (Blueprints, C++, Lumen, NavMesh, PCG)');
+    drawGridRow('Programming', 'C# · C++');
+    drawGridRow('Specialisations', 'Gameplay Programming · Enemy AI (Behavior Trees) · AR/VR Development · Level Design · UI/UX Systems · Multiplayer & Split-Screen · Wave Systems · Physics Simulation');
+    drawGridRow('Tools', 'Git · TextMeshPro · LeanTween · Niagara Particle System · WheelCollider · PlayerPrefs · UMG Widgets');
+    drawGridRow('Languages', 'English, Hindi, Marathi');
+
+    // Experience Section
+    drawSectionHeader('PROFESSIONAL EXPERIENCE');
+    drawJobHeader('Intern — Game Programmer', 'Mudgal Overseas (Kota, Rajasthan | Remote)', 'Dec 2025 – Mar 2026');
+    drawBullet('Built and iterated on gameplay mechanics for active game projects as part of the founding team.');
+    drawBullet('Optimised C# scripts for performance, reducing bottlenecks in core game loops.');
+    drawBullet('Executed full professional onboarding: signed NDA and IP Assignment Agreement on day one.');
+    drawBullet('Certificate issued by Shanu Mudgal, Founder-Director. Duration confirmed: 17 Dec 2025 - 17 Mar 2026.');
+
+    // Projects Section
+    drawSectionHeader('PROJECTS');
+    
+    // Project 1
+    drawProjectHeader('Dread Sands', 'Unreal Engine 5 · C++ · Team of 4 · 2025-26', 'Enemy AI, Main Menu, UI/UX, Skybox Integration');
+    drawBullet('Designed and implemented the complete Enemy AI pipeline using UE5 Behavior Trees and Blackboard components: custom BTT tasks for FindPlayerLocation, ChasePlayer, and Attack, plus an IsPlayerInRange service for melee detection.');
+    drawBullet('Built the main menu, UI HUD (health, ammo, wave, score), and integrated dynamic skybox and atmospheric assets.');
+    drawBullet('Created wave manager (AEnemyManager) scaling speed dynamically and point-earned economy.');
+    drawBullet('First-person wave survival shooter set in Al-Tariq ruins with complete audio pipeline integration.');
+    drawBullet('Dissertation scored a 9% index on iThenticate verification; certified by Dr. Shashank Dule.');
+
+    // Project 2
+    drawProjectHeader('Hyper-Drive', 'Unity 6 · C# · Solo Build · 2025-26', 'Solo Engine Architect & Physics');
+    drawBullet('Engineered a feature-complete 3D racing simulator from scratch: 5 tracks, 5 customizable cars, and 5 game modes.');
+    drawBullet('Implemented WheelCollider car physics with center-of-mass tuning and real-time tire drift mark trails (1000-section circular buffer).');
+    drawBullet('Programmed waypoint AI bots with adaptive throttle/steering ratios and raycast-based stuck-detection auto-resets.');
+    drawBullet('Built dual-controller splitscreen coop camera matrices and inputs with isolated UI canvas groups.');
+    drawBullet('Animated entire save/unlock system via LeanTween with PlayerPrefs metrics.');
+    drawBullet('Dissertation certified by Prof. Shashank Dule; submitted to Ajeenkya DY Patil University.');
+
+    // Project 3
+    drawProjectHeader('Agent-UN FPS', 'Unity 3D · C# · Solo Build', 'Kinematic shooting');
+    drawBullet('Complete FPS level featuring fluid kinematic weapon recoil/shooting, proximity checking spawners, and interactive HP/ammo collectible widgets.');
+
+    // Project 4
+    drawProjectHeader('AR Portfolio App', 'Unity 6 · AR Foundation · Solo Build', 'Face tracking');
+    drawBullet('Mobile markerless face mesh tracking overlays and print target spawners utilizing dual camera stream matrices.');
+
+    // Project 5
+    drawProjectHeader('Unreal Engine 5 - Environment Design', 'UE5 · PCG · Lumen · Solo Build', 'Technical Art');
+    drawBullet('Photorealistic environment design (jungle, village sunrise) with Procedural Content Generation foliage graphs and dynamic Lumen illumination postpack layouts.');
+
+    // Project 6
+    drawProjectHeader('2D Games Suite', 'Unity 2D · C# · Solo Build', 'Four Standalone Titles');
+    drawBullet('Developed four standalone 2D titles: Match the Shape, Stack Tower, Maze Runner, Apple - each with distinct mechanics, scoring systems, and polished UI.');
+
+    // Education Section
+    drawSectionHeader('EDUCATION');
+    drawJobHeader('Bachelor of Computer Application (Game Development)', 'Ajeenkya DY Patil University, Pune · School of Engineering', '2023 – 2026 (Final year)');
+    drawBullet('CGPA: 8.68 (First Class with Distinction)  |  104 / 104 Credits cleared with 0 Backlogs (Semester 6 completed May 2026)');
+    drawBullet('Semester 5 Academic Highlights: 3D Game Dev Using Unreal (A+), Technical Art (A+), 3D Game Dev & Presentation (A), Integrating Online Services (B+), Virtual Reality (B), Multiplayer Programming (B)');
+
+    drawJobHeader('Higher Secondary (12th — Science)', 'Dr. Bapuji Salunke College, Miraj', '2022 Graduate');
+    drawBullet('Focus areas: Physics, Chemistry, Mathematics, and Computer Science');
+
+    drawJobHeader('Secondary (10th)', 'Alphonsa School, Miraj', '2020 Graduate');
+    drawBullet('Passed with high academic accolades and distinctions.');
+
+    // Footer detail to tie it together beautifully
+    checkPageBreak(12);
+    y += 4;
+    doc.setDrawColor(240, 240, 240);
+    doc.setLineWidth(0.15);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 4;
+    doc.setFont('helvetica', 'oblique');
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Ganesh Chavan Portfolio Resume · Live Link: https://dynamite4090.github.io/ganesh-dev/', margin, y);
+
+    // Save File
+    doc.save('Ganesh_Chavan_Resume.pdf');
+  };
+
   const handleCopyText = () => {
     navigator.clipboard.writeText(plainTextResume);
     setCopied(true);
@@ -147,36 +446,26 @@ Alphonsa School, Miraj`;
           </div>
           <div className="space-y-0.5">
             <h2 className="font-head text-lg font-bold uppercase tracking-wider text-white">Interactive CV Hub</h2>
-            <p className="font-mono text-[11px] text-game-muted">Zero dependency deployment · Optimized for Chrome, Safari & Firefox</p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2.5">
           <button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2 bg-game-cyan hover:bg-game-cyan/85 text-black py-2.5 px-4 font-head font-bold text-xs tracking-wider uppercase rounded-lg cursor-pointer transition-all transform hover:-translate-y-0.5 shadow-[0_0_12px_rgba(0,212,255,0.3)]"
+            id="download-pdf-cv-btn"
+          >
+            <Download size={14} />
+            <span>Download PDF Resume</span>
+          </button>
+
+          <button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-game-cyan hover:bg-game-cyan/85 text-black py-2.5 px-4 font-head font-bold text-xs tracking-wider uppercase rounded-lg cursor-pointer transition-all transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 border border-game-border bg-game-card hover:bg-game-surface text-white py-2.5 px-4 font-head font-bold text-xs tracking-wider uppercase rounded-lg cursor-pointer transition-all"
             id="print-cv-btn"
           >
-            <Printer size={14} />
-            <span>Print or Save PDF</span>
-          </button>
-
-          <button
-            onClick={handleCopyText}
-            className="flex items-center gap-2 border border-game-border bg-game-card hover:bg-game-surface text-white py-2.5 px-4 font-head font-bold text-xs tracking-wider uppercase rounded-lg cursor-pointer transition-all"
-            id="copy-cv-text-btn"
-          >
-            {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-game-cyan" />}
-            <span>{copied ? 'Copied ATS Text!' : 'Copy ATS Plain Text'}</span>
-          </button>
-
-          <button
-            onClick={handleDownloadJson}
-            className="flex items-center gap-2 border border-game-border bg-game-card hover:bg-game-surface text-white py-2.5 px-4 font-head font-bold text-xs tracking-wider uppercase rounded-lg cursor-pointer transition-all"
-            id="download-cv-json-btn"
-          >
-            <Download size={14} className="text-game-orange" />
-            <span>Download JSON Data</span>
+            <Printer size={14} className="text-game-cyan" />
+            <span>Print Layout</span>
           </button>
         </div>
       </div>
