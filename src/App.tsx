@@ -13,6 +13,7 @@ import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
 import ResumeViewer from './components/ResumeViewer';
+import AccessDenied from './components/AccessDenied';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('home');
@@ -45,6 +46,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-game-bg text-white font-sans overflow-x-hidden scanline-overlay selection:bg-game-cyan/35 selection:text-white flex flex-col justify-between">
+      {/* Global DevTools Watchdog & Intercept Layer */}
+      <AccessDenied onBypass={() => {}} />
+
       {/* Top Fixed Header */}
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
